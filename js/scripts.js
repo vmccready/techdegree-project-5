@@ -109,41 +109,84 @@ $.ajax({
     //add gallery
     $("#gallery").html(galleryHTML);
 
+    //create search box
+    let $cards = $('div.card');
+    let $searchContainer = $('div.search-container');
+    let searchHTML = `
+    <form action="#" method="get">
+        <input type="search" id="search-input" class="search-input" placeholder="Search...">
+        <input type="submit" value="&#x1F50D;" id="serach-submit" class="search-submit">
+    </form>
+    `;
+    $searchContainer.html(searchHTML);
+    $searchContainer.on('input', (event)=>{
+        event.preventDefault();//dont refresh page
+        $cards.show(); //show all cards
+        let searchTerm = $('#search-input').val();
+        $cards.filter((i, card) => {
+            return !$(card).children().children('h3').html().includes(searchTerm); //check if search name matches
+        }).hide();
+    });
 
-
-
-
-    
-    //add event listener
+    //add event listener to create modal container
     $('#gallery').on('click', '.card', function(event){
         let username = ($(event.currentTarget).children().children('h3').html());
-        let user = randomusers.filter(user => {
-            return (user.name.first + ' ' + user.name.last === username);
+        let userIndex = 0;
+
+        let searchTerm = $('#search-input').val();
+        let visibleUsers = randomusers.filter((user)=>{
+            return (user.name.first + ' ' + user.name.last).includes(searchTerm)
         });
-        user = user[0];
-        let birthday = new Date(user.dob.date);
-        let modalHTML = `
-        <div class="modal-container">
-            <div class="modal">
-                <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
-                <div class="modal-info-container">
-                    <img class="modal-img" src="${user.picture.large}" alt="profile picture">
-                    <h3 id="name" class="modal-name cap">${user.name.first} ${user.name.last}</h3>
-                    <p class="modal-text">${user.email}</p>
-                    <p class="modal-text cap">${user.location.city}</p>
-                    <hr>
-                    <p class="modal-text">${user.phone}</p>
-                    <p class="modal-text">${upperFirstLetters(user.location.street)}, ${abbrState(user.location.state, 'abbr')} ${user.location.postcode}</p>
-                    <p class="modal-text">Birthday: ${birthday.toLocaleDateString("en-US")}</p>
+        for (userIndex; userIndex < randomusers.length ; userIndex += 1){
+            if (randomusers[userIndex].name.first + ' ' + randomusers[userIndex].name.last === username){break}
+        }
+
+        //create modal element - HTML and event listeners
+        function createModal(user){
+            $('div.modal-container').remove();
+            let birthday = new Date(user.dob.date);
+            let modalHTML = `
+            <div class="modal-container">
+                <div class="modal">
+                    <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
+                    <div class="modal-info-container">
+                        <img class="modal-img" src="${user.picture.large}" alt="profile picture">
+                        <h3 id="name" class="modal-name cap">${user.name.first} ${user.name.last}</h3>
+                        <p class="modal-text">${user.email}</p>
+                        <p class="modal-text cap">${user.location.city}</p>
+                        <hr>
+                        <p class="modal-text">${user.phone}</p>
+                        <p class="modal-text">${upperFirstLetters(user.location.street)}, ${abbrState(user.location.state, 'abbr')} ${user.location.postcode}</p>
+                        <p class="modal-text">Birthday: ${birthday.toLocaleDateString("en-US")}</p>
+                    </div>
+                </div>
+                <div class="modal-btn-container">
+                    <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
+                    <button type="button" id="modal-next" class="modal-next btn">Next</button>
                 </div>
             </div>
-        </div>
-        `;
-        $('body').append(modalHTML);
+            `;
+            $('body').append(modalHTML);
 
-        $('#modal-close-btn').on('click', function(event){
-            $('div.modal-container').remove();
-        });
+            //modal toggle event listeners
+            $('#modal-prev').on('click', function(event){
+                if (userIndex>0){userIndex -= 1};
+                $('div.modal-container').html(createModal(randomusers[userIndex]))
+            });
+
+            $('#modal-next').on('click', function(event){
+                if (userIndex<11){userIndex += 1};
+                $('div.modal-container').html(createModal(randomusers[userIndex]))
+            });
+
+            //close modal view with x
+            $('#modal-close-btn').on('click', function(event){
+                $('div.modal-container').remove();
+            });
+        }
+
+
+        createModal(randomusers[userIndex]);
     });
 
 
