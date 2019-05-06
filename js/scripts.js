@@ -108,6 +108,7 @@ $.ajax({
     });
     //add gallery
     $("#gallery").html(galleryHTML);
+    $('div.card').css('box-shadow', '2px 2px 5px')
 
     //create search box
     let $cards = $('div.card');
@@ -137,8 +138,8 @@ $.ajax({
         let visibleUsers = randomusers.filter((user)=>{
             return (user.name.first + ' ' + user.name.last).includes(searchTerm)
         });
-        for (userIndex; userIndex < randomusers.length ; userIndex += 1){
-            if (randomusers[userIndex].name.first + ' ' + randomusers[userIndex].name.last === username){break}
+        for (userIndex; userIndex < visibleUsers.length ; userIndex += 1){
+            if (visibleUsers[userIndex].name.first + ' ' + visibleUsers[userIndex].name.last === username){break}
         }
 
         //create modal element - HTML and event listeners
@@ -167,16 +168,15 @@ $.ajax({
             </div>
             `;
             $('body').append(modalHTML);
-
             //modal toggle event listeners
             $('#modal-prev').on('click', function(event){
                 if (userIndex>0){userIndex -= 1};
-                $('div.modal-container').html(createModal(randomusers[userIndex]))
+                createModal(visibleUsers[userIndex])
             });
 
             $('#modal-next').on('click', function(event){
-                if (userIndex<11){userIndex += 1};
-                $('div.modal-container').html(createModal(randomusers[userIndex]))
+                if (userIndex<(visibleUsers.length-1)){userIndex += 1};
+                createModal(visibleUsers[userIndex])
             });
 
             //close modal view with x
@@ -186,15 +186,8 @@ $.ajax({
         }
 
 
-        createModal(randomusers[userIndex]);
+        createModal(visibleUsers[userIndex]);
     });
-
-
-
-
-
-
   }
 });
-
 });
